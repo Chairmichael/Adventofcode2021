@@ -1,5 +1,20 @@
 from timeit import Timer
 
+def str_sort1(s):
+	return ''.join(sorted(s))
+
+def str_sort2(s):
+	new_s = ''
+	for c in s:
+		if c not in s:
+			if len(new_s) == 0:
+				new_s += c
+			else:
+				for x in new_s:
+					if c > x:
+						new_s += c
+	return new_s
+
 def str_diff(a,b):
 	c = ['','']
 	for x in a:
@@ -11,10 +26,13 @@ def str_diff(a,b):
 	return c # c[0]: a has, not b; c[1]: b has, not a
 
 def main():
-	data = [l.split()[0:10]+l.split()[11:] for l in open('input.txt').readlines()]
+	data = open('input.txt').readlines()
+	signal_paterns = (l.split()[0:10] for l in data)
+	output_signals = (l.split()[11:] for l in data)
+	
 	total_output = 0
 	for l in data:
-		legend = ['' for x in range(10)]
+		legend = [''] * 10
 		line = [''.join(sorted(digit)) for digit in l]
 		for digit in line:
 			if len(''.join(legend)) == 16:
@@ -77,4 +95,7 @@ def main():
 
 if __name__ == '__main__':
 	# print(str_diff('abdefg','acdeg'))
-	main()
+	t1 = Timer("str_sort1('gbefca')",setup="from __main__ import str_sort1")
+	print(t1.timeit())
+	print(str_sort2('cat'))
+	# main()
