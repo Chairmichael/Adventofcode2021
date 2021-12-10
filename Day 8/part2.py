@@ -1,19 +1,8 @@
 from timeit import Timer
 
-def str_sort1(s):
-	return ''.join(sorted(s))
-
-def str_sort2(s):
-	new_s = ''
-	for c in s:
-		if c not in s:
-			if len(new_s) == 0:
-				new_s += c
-			else:
-				for x in new_s:
-					if c > x:
-						new_s += c
-	return new_s
+def str_sort_list(data):
+	for l in data:
+		yield [''.join(sorted(s)) for s in l]
 
 def str_diff(a,b):
 	c = ['','']
@@ -27,75 +16,81 @@ def str_diff(a,b):
 
 def main():
 	data = open('input.txt').readlines()
-	signal_paterns = (l.split()[0:10] for l in data)
-	output_signals = (l.split()[11:] for l in data)
-	
+	signal_paterns = str_sort_list(l.split()[0:10] for l in data)
+	output_signals = str_sort_list(l.split()[11:] for l in data)
 	total_output = 0
-	for l in data:
+
+	for line, outputs in zip(signal_paterns, output_signals):
 		legend = [''] * 10
-		line = [''.join(sorted(digit)) for digit in l]
-		for digit in line:
+		for digit in line.copy():
 			if len(''.join(legend)) == 16:
 				break # finished finding uniques
 			elif len(digit) == 2:
 				legend[1] = digit
+				line.remove(digit)
 			elif len(digit) == 3:
 				legend[7] = digit
+				line.remove(digit)
 			elif len(digit) == 4:
 				legend[4] = digit
+				line.remove(digit)
 			elif len(digit) == 7:
 				legend[8] = digit
-		# segments
-		top = [x for x in legend[7] if x not in legend[1]][0]
+				line.remove(digit)
+
+		# top segment
+		top = next(x for x in legend[7] if x not in legend[1])
 
 		# 9 = top-seg + four-segs + bottom-seg
-		for digit in filter(lambda x: x not in legend, line):
-			diff = str_diff(digit, legend[4] + top)
-			if len(diff[0]) == 1 and diff[1] == '':
+		for digit in line:
+			if ''.join(sorted(legend[4] + top)) in digit:
 				legend[9] = digit
+				line.remove(digit)
+				break
 
 		# 9 - 3 = top-left-seg
 		# 3 = 9 - top-left-seg
-		for digit in filter(lambda x: x not in legend, line):
-			diff = str_diff(legend[9], digit)
-			if len(diff[0]) == 1 and diff[1] == '':
+		for digit in line:
+			if digit in legend[9]:
 				legend[3] = digit
+				line.remove(digit)
+				break
 
 		# 0 = 8 - middle-seg
-		for digit in filter(lambda x: x not in legend, line):
-				diff = str_diff(legend[8], digit)
-				if len(diff[0]) == 1 and diff[1] == '':
-					if str_diff(digit, legend[1])[1] == '': # check if digit contains 1
-						legend[0] = digit
-					else:
-						legend[6] = digit
+		for digit in line:
+			if digit in legend[8]:
+				legend[0] = digit
+				line.remove(digit)
+				break
+
+		# 6: only signal left with length of 6
+		for digit in line:
+			if len(digit) == 6:
+				legend[6] = digit
+				line.remove(digit)
+				break
 
 		# 5 = 6 - top-right-seg
-		for digit in filter(lambda x: x not in legend, line):
-				diff = str_diff(legend[6], digit)
-				if len(diff[0]) == 1 and diff[1] == '':
-					legend[5] = digit
+		for digit in line:
+			if digit in legend[6]:
+				legend[5] = digit
+				line.remove(digit)
+				break
 
 		# 2 (leftover)
-		for digit in filter(lambda x: x not in legend, line):
-				diff = str_diff(legend[6], digit)
-				if len(diff[0]) == 2 and diff[1] == 1:
-					legend[2] = digit
+		legend[2] = line[0]
 
-		output_signals = filter(lambda x: ''.join(sorted(x)), line[-4:])
-		for i, output in enumerate(output_signals):
-			try:
-				total_output += legend.index(output) * (10 ** (3 - i))
-			except Exception as e:
-				print(e)
-				breakpoint()
+		print(legend, len(legend))
+		print(outputs)
+		return
+
+		for i, output in enumerate(outputs):
+			total_output += legend.index(output) * (10 ** (3 - i))
+
 	print(total_output)
 
 
 
 if __name__ == '__main__':
 	# print(str_diff('abdefg','acdeg'))
-	t1 = Timer("str_sort1('gbefca')",setup="from __main__ import str_sort1")
-	print(t1.timeit())
-	print(str_sort2('cat'))
-	# main()
+	main()
