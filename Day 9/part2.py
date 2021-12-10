@@ -5,6 +5,7 @@ def slt(n, i, data):
 	else:
 		return n < data[i]
 
+# for el: scan horizontally and then vertically
 def main():
 	data = [[int(x) for x in row] for row in open('input.txt').read().split()]
 	with open('output.txt','w') as output:

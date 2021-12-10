@@ -19,7 +19,7 @@ def str_in(a,b):
 	return True
 
 def main():
-	data = open('input_simple.txt').readlines()
+	data = open('input.txt').readlines()
 	signal_paterns = str_sort_list(l.split()[0:10] for l in data)
 	output_signals = str_sort_list(l.split()[11:] for l in data)
 	total_output = 0
@@ -52,7 +52,7 @@ def main():
 		# 9 - 3 = top-left-seg
 		# 3 = 9 - top-left-seg
 		for digit in line:
-			if str_in(legend[9], digit):
+			if len(digit) == 5 and str_in(digit, legend[1]):
 				legend[3] = digit
 				line.remove(digit)
 				break
@@ -79,16 +79,18 @@ def main():
 				break
 
 		# 2 (leftover)
-		legend[2] = line[0]
+		if len(line) == 1:
+			legend[2] = line[0]
+		else:
+			breakpoint()
 
 		sumation = 0
 		for n, output in enumerate(outputs):
 			for i, x in enumerate(legend):
 				if str_same(x, output):
-					sumation += i * (10 ** (3 - n))
+					total_output += i * (10 ** (3 - n))
 					break
-		breakpoint()
-		total_output += sumation
+		# total_output += sumation
 		# sumation = []
 		# for n, output in enumerate(outputs):
 		# 	for i, x in enumerate(legend):
@@ -98,6 +100,7 @@ def main():
 		# total_output += int(''.join(sumation))
 
 	print(total_output)
+	# 974512
 
 
 
